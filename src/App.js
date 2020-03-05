@@ -1,46 +1,40 @@
 import React, { Component } from 'react';
-import Loading from './Loading';
-import DisplaySeason from './DisplaySeason';
+import unsplash from './api/unsplash';
+import SearchBar from './components/SearchBar';
+import ImageList from './components/ImageList';
+
 
 class App extends Component {
   state = {
-    lat: null,
-    errMsg: '',
-    errStyle: {
-      textAlign: `center`,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
-    }
+    images: []
   }
 
-  componentDidMount() {
-    window.navigator.geolocation.getCurrentPosition(
-      position => this.setState({ lat: position.coords.latitude }),
-      err => this.setState({ errMsg: err.message })
-    )
-  }
-
-  renderContent() {
-    if (!this.state.late && this.state.errMsg) {
-      return (
-        <div style={this.state.errStyle}>
-          <span></span>
-          <h1>Error: {this.state.errMsg}</h1>
-          <span></span>
-        </div>
-      )
-    }
-    if (this.state.lat && !this.state.errMsg) {
-      return <DisplaySeason lat={this.state.lat} />
-    }
-    return <Loading MSG="Please Accept GEOLOCATION Permission!" />
+  onSubmitSearch = async term => {
+    const response = await unsplash.get('/search/photos', {
+      params: { query: term }
+    })
+    this.setState({
+      images: response.data.results
+    })
   }
 
   render() {
     return (
-      <div>
-        {this.renderContent()}
+      <div className="container-fluid">
+        {/* Start Greeting  */}
+        <div className="row">
+          <div className="col-sm-12 p-3">
+            <h1 className="text-center mt-5">Search Application Tutorial</h1>
+            <p className="text-center text-primary">Using Unsplash API</p>
+          </div>
+        </div>
+        {/* End Greeting */}
+        {/* Starting Search Bar */}
+        <SearchBar onSubmitSearch={this.onSubmitSearch} />
+        {/* Ending Search Bar */}
+        {/* Starting The Image List */}
+        <ImageList images={this.state.images} />
+        {/* ending The Image List */}
       </div>
     );
   }
